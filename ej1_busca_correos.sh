@@ -75,10 +75,31 @@ then
 directorio=$(pwd)"/$1"
 fi
 
-#Probar que $directorio es un directorio y que tenemos permisos
+#Probar que $directorio existe.
 
+if ! test -a "$directorio"
+then
+echo  El directorio $directorio no existe >&2
+exit 1
+fi
 
-find "$recursivo" "$archivo" "$directorio" | egrep -o "^[a-zA-Z0-9\._]*@$dominio"
+#Prueba que el directorio es un directorio y no un archivo
+
+if ! test -d "$directorio"
+then
+echo El parámetro $directorio no es un directorio >&2
+exit 2
+fi
+
+#Prueba que se tenga los permisos necesarios
+
+if ! ([ -r "$directorio" ] && [ -x "$directorio" ])
+then
+echo No se tienen los permisos necesarios para acceder al directorio y buscar correos >&2
+exit 3
+fi
+
+find "$recursivo" "$archivo" "$directorio" | egrep -o "^[a-zA-Z0-9\._]*@$dominio" | echo Cantidad de correos electrónicos encontrados en el directorio $directorio: $(expr $(wc -l) - 1)
 
 #PRUEBAS
 echo "recursivo $recursivo dominio $dominio directorio $directorio"
