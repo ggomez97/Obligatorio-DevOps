@@ -7,7 +7,7 @@
 
 recursivo="-maxdepth 1"
 archivo="*"
-dominio="[A-Za-z0-9_.]*"
+dominio="[^._][A-Za-z0-9_.]*"
 
 #El siguiente if comprueba que la cantidad de parametros es correcta debe ser entre 1 y 5 parametros.
 
@@ -98,7 +98,30 @@ echo No se tienen los permisos necesarios para acceder al directorio y buscar co
 exit 3
 fi
 
-find "$directorio" $recursivo -name "$archivo" -type f | grep -o "[A-Za-z0-9_.]*[^._]@[^._]$dominio" | #echo Cantidad de correos electrónicos encontrados en el directorio $directorio: $(expr $(wc -l) - 1)
+#Procedemos a realizar la busqueda mediante un grep con las opciones "-o" para que busque solo las coincidencias y no toda la linea
+#además un "-h" para que no me ponga como prefijo el archivo donde encontro la expreción.
+#Nuestra expreción cuenta de 3 partes una que es cualquier combinacion de letras mayusculas o minusculas,
+#números puntos o guiones bajos "[A-Za-z0-9_.]*", 
+#seguido de un @ que no puede estar precedido de un punto o guion bajo "[^._]@",
+#y una tercer parte que sera la variable "$dominio" que esta precargada que no puede iniciar con punto o guion bajo
+#pero luego puede seguir con cualquier combinacion de letras números puntos o guiones bajos "[^._][A-Za-z0-9_.]*"
+#a no ser que se haya puesto el parametro "-d" en tal caso tendra cargado el parametro que hayamos puesto luego del "-d"
+#Este grep buscara dichas expresiones en los archivos resultantes de la ejecucion del comando find en la variable "$directorio" la cual
+#tiene cargado el camino absoluto al directorio que pasamos como parametro, luego vendra la variable "$recursivo" que tiene guardado "-maxdepth 1"
+#y en caso de haber pasado -r estará vacia de manera que el find sea recursivo, luego viene el -name seguido de la variable "$archivo" la cual está
+#precargada con ".*" para buscar en todos los archivos ya sea ocultos o no o en caso de haber pasado -t tendra cargado "*.txt" de manera de buscar solo
+#los archivos no ocultos con extencion ".txt" seguido de un -type f para que busque solo archivos regulares.
+#Esta salida la redireccionamos a un archivo "temp"
 
-#PRUEBAS
-echo "recursivo $recursivo dominio $dominio directorio $directorio"
+grep -oh "[A-Za-z0-9_.]*[^._]@$dominio" $(find "$directorio" $recursivo -name "$archivo" -type f)>temp
+
+#Realizamos un cat de el archivo "temp" para que liste los correos que hemos encontrado
+cat temp
+
+#Imprimimos en pantalla mediante un echo La cantidad de correos encontrados en "$directorio"(camino absoluto pasado como parametro) es:
+#Ejecutamos un wc -l pasandole a su entrada estandar el archivo "temp" de manera de obtener solo el numero y el archivo que pasamos para contar
+#esto se podria sustituir por un "cat temp | wc -l"
+echo "La cantidad de correos en "$directorio" es: "$(wc -l < temp)
+
+#Procedemos a borrar el archivo temporal que creamos previamente
+rm temp
