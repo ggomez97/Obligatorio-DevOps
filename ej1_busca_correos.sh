@@ -6,8 +6,8 @@
 #en caso de que se pase el parametro -r esta variable debera vaciarse.
 
 recursivo="-maxdepth 1"
-archivo="[a-zA-Z0-9\._-]*"
-dominio="[a-zA-Z0-9\._]*.$"
+archivo="*"
+dominio="[A-Za-z0-9_.]*"
 
 #El siguiente if comprueba que la cantidad de parametros es correcta debe ser entre 1 y 5 parametros.
 
@@ -26,7 +26,6 @@ do
         ;;
 
         t) #Busca solamente correos en archivos regulares y no ocultos con extencion .txt
-           echo "pasaste parametro -t"
            archivo="*.txt"
 
         ;;
@@ -99,7 +98,7 @@ echo No se tienen los permisos necesarios para acceder al directorio y buscar co
 exit 3
 fi
 
-find "$recursivo" "$archivo" "$directorio" | egrep -o "^[a-zA-Z0-9\._]*@$dominio" | echo Cantidad de correos electrónicos encontrados en el directorio $directorio: $(expr $(wc -l) - 1)
+find "$directorio" $recursivo -name "$archivo" -type f | grep -o "[A-Za-z0-9_.]*[^._]@[^._]$dominio" | #echo Cantidad de correos electrónicos encontrados en el directorio $directorio: $(expr $(wc -l) - 1)
 
 #PRUEBAS
 echo "recursivo $recursivo dominio $dominio directorio $directorio"
