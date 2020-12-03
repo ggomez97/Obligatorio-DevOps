@@ -1,3 +1,4 @@
+#/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 #ej2_busca_correos_expandido.py [-r] [-t] [-d dom] [-e {d,t,c}] [-f RegExp] [-o {a,d,l}] Dir
@@ -16,14 +17,12 @@ parser.add_argument("-r", "--recursivo", help="Busca los arvhivos en forma recur
 
 parser.add_argument("-t","--texto",help="Busca solo los arvhivos regulares no ocultos con extencion .txt.",action="store_true")
 
-parser.add_argument("-d","--dominio",help="Buscasolo los correos de ese dominio.",action="store_true")
+parser.add_argument("-d","--dominio", type=str, help="Buscasolo los correos de ese dominio.")
 
-parser.add_argument("dominio",type=str,help="Dominio que se buscara en los correos.")
-
-parser.add_argument("-e","--encontrados",type=str, choices=["d","t","c"], help="Desplega cantidad de correos electronicos encontrados por dominio (opcion d) \
+parser.add_argument("-e","--encontrados", type=str, choices=["d","t","c"], help="Desplega cantidad de correos electronicos encontrados por dominio (opcion d) \
 por cantidad de dominios diferentes encontrados opcion (t) y con la opcion (c) despliega la cantidad de correos como la cantidad de dominios diferentes encontrados.")
 
-parser.add_argument("-f", "--regexp", help="Despliega y contabiliza solo correos electronicos que cumplan con la exprecion regular precedida del parametro (-f).", action="store_true")
+parser.add_argument("-f", "--regexp", help="Despliega y contabiliza solo correos electronicos que cumplan con la exprecion regular precedida del parametro (-f).")
 
 parser.add_argument("-o","--ordenar",type=str, choices=["a","d","l"],help="Ordena la salida de correos, con la opcion (o) ordena los correos aflabeticamente, con la opcion (d) \
 ordena los correos por alfabeticamente creciente por dominio y con la opcion (l) ordena los correos por su largo de caracteres en forma creciente.")
@@ -64,13 +63,14 @@ if args.texto:
 
 if args.dominio:
         bash_script_parametros.append("-d")
+        bash_script_parametros.append(args.dominio)
+# La opcion d la lista la cantidad de correos para cada dominio encontrado.
+
+        
+
 
 #Si el usuario a elegido que la busqueda de correos sea con determinado dominio , tenemos que pasarle el dominio que eligio al script "ej1_busca_correos.sh".
 #Con el append lo colocamos al final de la linea
-
-bash_script_parametros.append(args.dominio)
-
-
 #Al script "ej1_busca_correos.sh" hay que pasarle en que directorio buscar los correos por ende hay que cargarle el parametro directorio a "ej1_busca_correos.sh".
 #Con el append lo colocamos al final de la linea
 
@@ -89,6 +89,7 @@ process = Popen (bash_script_parametros,stdout=PIPE,stderr= PIPE)
 # La variable output será la salida estándar como primer elemento y la salida estándar de errores como segundo elemento.
 
 output= process.communicate()
+
 if process.returncode > 0:
  # Se despliega el mensaje producido por el script del ejercicio 1 por
  # la salida estándar de errores.
@@ -103,9 +104,89 @@ if output[1].decode() != "":
  print(output[1].decode(), file=sys.stderr, end="")
  exit(0)
 
-lista_archivos_ej1 = output[0].decode().split("\n")
+lista_correos = output[0].decode().split("\n")
 
-print (lista_archivos_ej1)
+lista_correos.pop(-1)
+lista_correos.pop(-1)
 
-print(file=sys.stderr)
+if args.regexp != None:
+    try:
+        patron = re.compile(args.regexp)
+    except Exception as e:
+        print("La expresión regular ingresada no es correcta. Ingrese una expresión regular valida.", file=sys.stderr)
+        exit(10)
+    correos_filtrados = []
+    # Se filtran las líneas de correos con la expresión regular indicada.
+    for correo in lista_correos:
+        if patron.match(correo):
+            # Se adiciona el correo a la lista de correos filtrados.
+            correos_filtrados.append(correo)
+    # Luego de crear la lista de correos filtrados según la expresión regular, se cambia la lista original por la lista filtrada.
+    #cat archivo_filtrado
+    lista_correos=correos_filtrados
 
+if args.ordenar == "a":
+        lista_correos.sort(key=lambda elemento:(elemento.split("@")[0])) #Ordena los correos de la lista alfabeticamente lambda personaliza la manera en la cual se va a ordenar, en este caso se ordenara por el primer parametro antes del "@"
+        for i in lista_correos:
+                print(i)
+        print("")
+
+elif args.ordenar == "d":
+        lista_correos.sort(key=lambda elemento:(elemento.split("@")[1])) #Ordena los dominios de los correos de la lista alfabeticamente
+        for i in lista_correos:
+                print(i)
+        print("")
+        
+elif args.ordenar == "l":
+        lista_correos.sort(key=len) #Con key=len se ordenaran los elementos de la lista por el largo de manera acendente
+        for i in lista_correos:
+                print(i)
+        print("")
+        print("Cantidad de correos electrónicos encontrados en el directorio",args.directorio,":",len(lista_correos),"\n")
+        
+
+if args.encontrados == "d":          
+        dominios_cant = {}
+        print("Reporte cantidad de correos encontrados por dominio:")
+       
+        for correo in lista_correos:
+                dominio=correo.split("@")[1]
+                if dominio not in dominios_cant:
+                        dominios_cant[dominio] = 1
+                else:
+                        dominios_cant[dominio] += 1
+        for dominio in dominios_cant:
+                print (dominio,"-", dominios_cant[dominio])
+        
+
+elif args.encontrados == "t":
+        lista_dominios = []
+        for correo in lista_correos:
+                dominio=correo.split("@")[1]
+                if dominio not in lista_dominios:
+                        lista_dominios.append(dominio)
+        for i in lista_correos:
+                print(i)
+        print("Cantidad de dominios diferentes encontrados:",len(lista_dominios))
+
+elif args.encontrados == "c":
+        dominios_cant = {}
+        print("Reporte cantidad de correos encontrados por dominio:")
+        for correo in lista_correos:
+                dominio=correo.split("@")[1]
+                if dominio not in dominios_cant:
+                        dominios_cant[dominio] = 1
+                else:
+                        dominios_cant[dominio] += 1
+        for dominio in dominios_cant:
+                print (dominio,"-" ,dominios_cant[dominio])
+        lista_dominios = []
+        for correo in lista_correos:
+                dominio=correo.split("@")[1]
+                if dominio not in lista_dominios:
+                        lista_dominios.append(dominio)
+        print("La cantidad de dominios diferentes encontrados es: " + str(len(lista_dominios))) #Con str convertimos la lista en string para que se pueda concatenar
+
+if args.ordenar == None and args.encontrados == None and args.regexp == None:
+        for i in lista_correos:
+                print(i)
