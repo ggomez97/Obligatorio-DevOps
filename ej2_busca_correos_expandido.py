@@ -143,7 +143,7 @@ elif args.ordenar == "d":
         for i in lista_correos:
                 print(i)
         print("")
-        
+#Este IF  simplemente cuenta los elementos de la lista de manera acendiente.Key nos permite saber el argo y con len contarlo, sort los ordena de manera acendiente.
 elif args.ordenar == "l":
         lista_correos.sort(key=len) #Con key=len se ordenaran los elementos de la lista por el largo de manera acendente
         for i in lista_correos:
@@ -151,49 +151,52 @@ elif args.ordenar == "l":
         print("")
         print("Cantidad de correos electrónicos encontrados en el directorio",args.directorio,":",len(lista_correos),"\n")
         
-
+#Con los siguientes IF nos mostrara los correos electronicos encontrados segun que reporte queremos ver.Con -ed lista la cantidad de correos encontrado por cada dominio
+ #de los correos en la lista.Con -et se listan la cantidad de dominios diferentes encontrados y con -ec reporta la cantidad de corrreos encontrado por dominio
 if args.encontrados == "d":          
-        dominios_cant = {}
+        dominios_cant = {} #Definimos un directorio.
         print("Reporte cantidad de correos encontrados por dominio:")
        
-        for correo in lista_correos:
-                dominio=correo.split("@")[1]
+        for correo in lista_correos:#Para cada correo en "lista_correos" agregamos el dominio en la variable "dominio".
+                dominio=correo.split("@")[1]#
                 if dominio not in dominios_cant:
-                        dominios_cant[dominio] = 1
+                        dominios_cant[dominio] = 1 #Por cada dominio que no este en el dicionario dominio lo agrega.
                 else:
-                        dominios_cant[dominio] += 1
+                        dominios_cant[dominio] += 1#Si el dominio ya esta en la variable dominios_cant se suma 1 al dominio.
         for dominio in dominios_cant:
-                print (dominio,"-", dominios_cant[dominio])
-        
+                print (dominio,"-", dominios_cant[dominio])#Por cada dominio en el diccionario dominos_cant se imprime el dominio separado por un guion seguido 
+                                                                #de la cantidad de veces que se repitio ese dominio.
+       
 
-elif args.encontrados == "t":
-        lista_dominios = []
-        for correo in lista_correos:
+elif args.encontrados == "t": 
+        lista_dominios = []#Se declara la lista lista_dominio
+        for correo in lista_correos:#Por cada correo en lsita correo se separa el dominio y se guarda en la variable dominio.
                 dominio=correo.split("@")[1]
-                if dominio not in lista_dominios:
+                if dominio not in lista_dominios:#Si el dominio no esta  en lista_dominio  lo agrega al final de la lista 
                         lista_dominios.append(dominio)
         for i in lista_correos:
                 print(i)
-        print("Cantidad de dominios diferentes encontrados:",len(lista_dominios))
+        print("Cantidad de dominios diferentes encontrados:",len(lista_dominios))#Contabiliza los diferente tipos de dominio agregados a la lista lista_dominio.
 
 elif args.encontrados == "c":
-        dominios_cant = {}
+        dominios_cant = {}#Se declara el diccionario de cantidad de 
         print("Reporte cantidad de correos encontrados por dominio:")
         for correo in lista_correos:
-                dominio=correo.split("@")[1]
+                dominio=correo.split("@")[1]#Para cada correo en "lista_correos" agregamos el dominio en la variable "dominio".
                 if dominio not in dominios_cant:
-                        dominios_cant[dominio] = 1
+                        dominios_cant[dominio] = 1 #Por cada dominio que no este en el dicionario dominio lo agrega.
                 else:
-                        dominios_cant[dominio] += 1
+                        dominios_cant[dominio] += 1 #Si el dominio ya esta en la variable dominios_cant se suma 1 al dominio.
         for dominio in dominios_cant:
-                print (dominio,"-" ,dominios_cant[dominio])
-        lista_dominios = []
-        for correo in lista_correos:
-                dominio=correo.split("@")[1]
-                if dominio not in lista_dominios:
+                print (dominio,"-" ,dominios_cant[dominio])#Por cada dominio en el diccionario dominos_cant se imprime el dominio separado por un guion seguido 
+                                                                #de la cantidad de veces que se repitio ese dominio.
+        lista_dominios = [] #Se declara la lista lista_dominio 
+        for correo in lista_correos: #Por correo en lista_correo 
+                dominio=correo.split("@")[1]#se guarda el dominio del correo.
+                if dominio not in lista_dominios:#Si el dominio no esta en lista_dominio se agrega al final.
                         lista_dominios.append(dominio)
         print("La cantidad de dominios diferentes encontrados es: " + str(len(lista_dominios))) #Con str convertimos la lista en string para que se pueda concatenar
 
-if args.ordenar == None and args.encontrados == None and args.regexp == None:
+if args.ordenar == None and args.encontrados == None and args.regexp == None:#Si ninguno de esteos parametros es ingresado, se imprime el resultado del ejercicio1.
         for i in lista_correos:
                 print(i)
